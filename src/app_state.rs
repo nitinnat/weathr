@@ -39,6 +39,13 @@ impl AppState {
         self.weather_conditions.is_cloudy = weather.condition.is_cloudy();
         self.weather_conditions.is_foggy = weather.condition.is_foggy();
         self.weather_conditions.is_day = weather.is_day;
+        self.weather_conditions.is_hail = weather.condition.is_hail();
+        self.weather_conditions.is_flood = weather.condition.is_flood();
+        self.weather_conditions.is_tsunami = weather.condition.is_tsunami();
+        self.weather_conditions.is_volcano = weather.condition.is_volcano();
+        self.weather_conditions.is_godzilla = weather.condition.is_godzilla();
+        self.weather_conditions.is_meteor = weather.condition.is_meteor();
+        self.weather_conditions.is_disaster = weather.condition.is_disaster();
 
         self.current_weather = Some(weather);
         self.is_offline = false;
@@ -74,6 +81,12 @@ impl AppState {
                 WeatherCondition::SnowShowers => "Snow Showers",
                 WeatherCondition::Thunderstorm => "Thunderstorm",
                 WeatherCondition::ThunderstormHail => "Thunderstorm with Hail",
+                WeatherCondition::Hail => "Hail",
+                WeatherCondition::Flood => "Flood",
+                WeatherCondition::Tsunami => "Tsunami",
+                WeatherCondition::Volcano => "Volcano",
+                WeatherCondition::Godzilla => "Godzilla Attack",
+                WeatherCondition::Meteor => "Meteor Impact",
             }
         } else {
             "Loading"
@@ -137,6 +150,9 @@ impl AppState {
         }
 
         if let Some(ref weather) = self.current_weather {
+            if weather.condition.is_disaster() {
+                return false;
+            }
             matches!(
                 weather.condition,
                 WeatherCondition::Clear | WeatherCondition::PartlyCloudy | WeatherCondition::Cloudy
@@ -152,6 +168,9 @@ impl AppState {
         }
 
         if let Some(ref weather) = self.current_weather {
+            if weather.condition.is_disaster() {
+                return false;
+            }
             let is_warm = weather.temperature > 15.0;
             let is_clear_night = matches!(
                 weather.condition,

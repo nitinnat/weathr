@@ -192,6 +192,7 @@ Available weather conditions:
 - Precipitation: `fog`, `drizzle`, `rain`, `freezing-rain`, `rain-showers`
 - Snow: `snow`, `snow-grains`, `snow-showers`
 - Storms: `thunderstorm`, `thunderstorm-hail`
+- Simulation Only: `hail`, `flood`, `tsunami`, `volcano`, `godzilla`, `meteor`
 
 Override configuration:
 

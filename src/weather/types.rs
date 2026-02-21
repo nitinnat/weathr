@@ -17,6 +17,12 @@ pub enum WeatherCondition {
     SnowShowers,
     Thunderstorm,
     ThunderstormHail,
+    Hail,
+    Flood,
+    Tsunami,
+    Volcano,
+    Godzilla,
+    Meteor,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -96,6 +102,42 @@ impl WeatherCondition {
     pub fn is_foggy(&self) -> bool {
         matches!(self, Self::Fog)
     }
+
+    pub fn is_hail(&self) -> bool {
+        matches!(self, Self::Hail)
+    }
+
+    pub fn is_flood(&self) -> bool {
+        matches!(self, Self::Flood)
+    }
+
+    pub fn is_tsunami(&self) -> bool {
+        matches!(self, Self::Tsunami)
+    }
+
+    pub fn is_volcano(&self) -> bool {
+        matches!(self, Self::Volcano)
+    }
+
+    pub fn is_godzilla(&self) -> bool {
+        matches!(self, Self::Godzilla)
+    }
+
+    pub fn is_meteor(&self) -> bool {
+        matches!(self, Self::Meteor)
+    }
+
+    pub fn is_disaster(&self) -> bool {
+        matches!(
+            self,
+            Self::Hail
+                | Self::Flood
+                | Self::Tsunami
+                | Self::Volcano
+                | Self::Godzilla
+                | Self::Meteor
+        )
+    }
 }
 
 impl std::str::FromStr for WeatherCondition {
@@ -117,8 +159,14 @@ impl std::str::FromStr for WeatherCondition {
             "snow_showers" | "snow-showers" => Ok(Self::SnowShowers),
             "thunderstorm" => Ok(Self::Thunderstorm),
             "thunderstorm_hail" | "thunderstorm-hail" => Ok(Self::ThunderstormHail),
+            "hail" => Ok(Self::Hail),
+            "flood" => Ok(Self::Flood),
+            "tsunami" => Ok(Self::Tsunami),
+            "volcano" => Ok(Self::Volcano),
+            "godzilla" => Ok(Self::Godzilla),
+            "meteor" | "meteor-impact" | "meteor_impact" => Ok(Self::Meteor),
             _ => Err(format!(
-                "Unknown weather condition: '{}'. Valid options: clear, partly_cloudy, cloudy, overcast, fog, drizzle, rain, freezing_rain, snow, snow_grains, rain_showers, snow_showers, thunderstorm, thunderstorm_hail",
+                "Unknown weather condition: '{}'. Valid options: clear, partly_cloudy, cloudy, overcast, fog, drizzle, rain, freezing_rain, snow, snow_grains, rain_showers, snow_showers, thunderstorm, thunderstorm_hail, hail, flood, tsunami, volcano, godzilla, meteor",
                 s
             )),
         }
@@ -214,6 +262,13 @@ pub struct WeatherConditions {
     pub is_cloudy: bool,
     pub is_foggy: bool,
     pub is_day: bool,
+    pub is_hail: bool,
+    pub is_flood: bool,
+    pub is_tsunami: bool,
+    pub is_volcano: bool,
+    pub is_godzilla: bool,
+    pub is_meteor: bool,
+    pub is_disaster: bool,
 }
 
 impl Default for WeatherConditions {
@@ -225,6 +280,13 @@ impl Default for WeatherConditions {
             is_cloudy: false,
             is_foggy: false,
             is_day: true,
+            is_hail: false,
+            is_flood: false,
+            is_tsunami: false,
+            is_volcano: false,
+            is_godzilla: false,
+            is_meteor: false,
+            is_disaster: false,
         }
     }
 }

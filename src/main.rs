@@ -130,6 +130,14 @@ async fn main() -> io::Result<()> {
                 eprintln!("    thunderstorm       - Thunderstorm");
                 eprintln!("    thunderstorm-hail  - Thunderstorm with hail");
                 eprintln!();
+                eprintln!("  Simulation Only:");
+                eprintln!("    hail               - Hail barrage");
+                eprintln!("    flood              - Rising floodwaters");
+                eprintln!("    tsunami            - Coastal wave surge");
+                eprintln!("    volcano            - Erupting volcano");
+                eprintln!("    godzilla           - City under attack");
+                eprintln!("    meteor             - Extinction-level event");
+                eprintln!();
                 eprintln!("Examples:");
                 eprintln!("  weathr --simulate rain");
                 eprintln!("  weathr --simulate snow --night");

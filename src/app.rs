@@ -93,24 +93,30 @@ impl App {
                         WeatherCondition::Clear
                     });
 
+            let (precipitation, wind_speed, cloud_cover, pressure) = match simulated_condition {
+                WeatherCondition::Hail => (8.0, 28.0, 85.0, 1007.0),
+                WeatherCondition::Flood => (20.0, 14.0, 92.0, 1003.0),
+                WeatherCondition::Tsunami => (0.0, 35.0, 75.0, 1000.0),
+                WeatherCondition::Volcano => (0.0, 12.0, 60.0, 995.0),
+                WeatherCondition::Godzilla => (0.0, 18.0, 50.0, 1008.0),
+                WeatherCondition::Meteor => (0.0, 45.0, 40.0, 990.0),
+                _ => (if simulated_condition.is_raining() { 2.5 } else { 0.0 }, 10.0, 50.0, 1013.0),
+            };
+
             let weather = WeatherData {
                 condition: simulated_condition,
                 temperature: 20.0,
                 apparent_temperature: 19.0,
                 humidity: 65.0,
-                precipitation: if simulated_condition.is_raining() {
-                    2.5
-                } else {
-                    0.0
-                },
+                precipitation,
                 wind_speed: if simulated_condition.is_thunderstorm() {
                     45.0
                 } else {
-                    10.0
+                    wind_speed
                 },
                 wind_direction: 225.0,
-                cloud_cover: 50.0,
-                pressure: 1013.0,
+                cloud_cover,
+                pressure,
                 visibility: Some(10000.0),
                 is_day: !simulate_night,
                 moon_phase: Some(0.5),

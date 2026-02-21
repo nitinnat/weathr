@@ -1,8 +1,10 @@
 use crate::animation::{
     AnimationController, airplanes::AirplaneSystem, birds::BirdSystem, chimney::ChimneySmoke,
-    clouds::CloudSystem, fireflies::FireflySystem, fog::FogSystem, leaves::FallingLeaves,
+    clouds::CloudSystem, fireflies::FireflySystem, fog::FogSystem, flood::FloodSystem,
+    godzilla::GodzillaSystem, hail::HailSystem, leaves::FallingLeaves, meteor::MeteorSystem,
     moon::MoonSystem, raindrops::RaindropSystem, snow::SnowSystem, stars::StarSystem,
-    sunny::SunnyAnimation, thunderstorm::ThunderstormSystem,
+    sunny::SunnyAnimation, thunderstorm::ThunderstormSystem, tsunami::TsunamiSystem,
+    volcano::VolcanoSystem,
 };
 use crate::app_state::AppState;
 use crate::render::TerminalRenderer;
@@ -20,6 +22,12 @@ pub struct AnimationManager {
     snow_system: SnowSystem,
     fog_system: FogSystem,
     thunderstorm_system: ThunderstormSystem,
+    hail_system: HailSystem,
+    flood_system: FloodSystem,
+    tsunami_system: TsunamiSystem,
+    volcano_system: VolcanoSystem,
+    godzilla_system: GodzillaSystem,
+    meteor_system: MeteorSystem,
     cloud_system: CloudSystem,
     bird_system: BirdSystem,
     airplane_system: AirplaneSystem,
@@ -41,6 +49,12 @@ impl AnimationManager {
             snow_system: SnowSystem::new(term_width, term_height, SnowIntensity::Light),
             fog_system: FogSystem::new(term_width, term_height, FogIntensity::Light),
             thunderstorm_system: ThunderstormSystem::new(term_width, term_height),
+            hail_system: HailSystem::new(term_width, term_height, term_height),
+            flood_system: FloodSystem::new(),
+            tsunami_system: TsunamiSystem::new(),
+            volcano_system: VolcanoSystem::new(),
+            godzilla_system: GodzillaSystem::new(),
+            meteor_system: MeteorSystem::new(term_width),
             cloud_system: CloudSystem::new(term_width, term_height),
             bird_system: BirdSystem::new(term_width, term_height),
             airplane_system: AirplaneSystem::new(term_width, term_height),
@@ -103,6 +117,7 @@ impl AnimationManager {
             && !conditions.is_thunderstorm
             && !conditions.is_snowing
             && conditions.is_day
+            && !conditions.is_disaster
         {
             self.bird_system.update(term_width, term_height, &mut rng);
             self.bird_system.render(renderer)?;
@@ -112,6 +127,7 @@ impl AnimationManager {
             && !conditions.is_raining
             && !conditions.is_thunderstorm
             && !conditions.is_snowing
+            && !conditions.is_disaster
         {
             let animation_y = if term_height > 20 { 3 } else { 2 };
             self.animation_controller
@@ -143,6 +159,7 @@ impl AnimationManager {
             && !conditions.is_thunderstorm
             && !conditions.is_snowing
             && !conditions.is_foggy
+            && !conditions.is_disaster
         {
             self.airplane_system
                 .update(term_width, term_height, &mut rng);
@@ -160,7 +177,7 @@ impl AnimationManager {
         term_height: u16,
         mut rng: &mut impl rand::Rng,
     ) -> io::Result<()> {
-        if conditions.is_raining || conditions.is_thunderstorm {
+        if conditions.is_raining || conditions.is_thunderstorm || conditions.is_disaster {
             return Ok(());
         }
         let ground_height = WorldScene::GROUND_HEIGHT;
@@ -186,6 +203,9 @@ impl AnimationManager {
         term_height: u16,
         mut rng: &mut impl rand::Rng,
     ) -> io::Result<()> {
+        let ground_height = WorldScene::GROUND_HEIGHT;
+        let horizon_y = term_height.saturating_sub(ground_height);
+
         if conditions.is_thunderstorm {
             self.raindrop_system
                 .update(term_width, term_height, &mut rng);
@@ -205,6 +225,10 @@ impl AnimationManager {
         } else if conditions.is_snowing {
             self.snow_system.update(term_width, term_height, &mut rng);
             self.snow_system.render(renderer)?;
+        } else if conditions.is_hail {
+            self.hail_system
+                .update(term_width, term_height, horizon_y, &mut rng);
+            self.hail_system.render(renderer)?;
         }
 
         if conditions.is_foggy {
@@ -212,10 +236,42 @@ impl AnimationManager {
             self.fog_system.render(renderer)?;
         }
 
+        if conditions.is_volcano {
+            self.volcano_system.update(term_width, horizon_y, &mut rng);
+            self.volcano_system.render(renderer, term_width, horizon_y)?;
+        }
+
+        if conditions.is_godzilla {
+            self.godzilla_system.update(term_width, &mut rng);
+            self.godzilla_system.render(renderer, term_width, horizon_y)?;
+        }
+
+        if conditions.is_meteor {
+            self.meteor_system.update(term_width, horizon_y, &mut rng);
+            self.meteor_system
+                .render(renderer, term_width, term_height, horizon_y)?;
+            if self.meteor_system.is_flashing() {
+                renderer.flash_screen()?;
+            }
+        }
+
+        if conditions.is_flood {
+            self.flood_system.update(term_width, term_height);
+            self.flood_system
+                .render(renderer, term_width, term_height)?;
+        }
+
+        if conditions.is_tsunami {
+            self.tsunami_system.update(term_width, horizon_y, &mut rng);
+            self.tsunami_system
+                .render(renderer, term_width, term_height, horizon_y)?;
+        }
+
         if self.show_leaves
             && !conditions.is_raining
             && !conditions.is_thunderstorm
             && !conditions.is_snowing
+            && !conditions.is_disaster
         {
             self.falling_leaves
                 .update(term_width, term_height, &mut rng);
@@ -229,6 +285,7 @@ impl AnimationManager {
         if !conditions.is_raining
             && !conditions.is_thunderstorm
             && !conditions.is_snowing
+            && !conditions.is_disaster
             && self.last_frame_time.elapsed() >= FRAME_DELAY
         {
             self.animation_controller.next_frame(&self.sunny_animation);
